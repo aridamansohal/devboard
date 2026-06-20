@@ -1,43 +1,40 @@
-# Goal: Build the image for DevBoard Frontend and Push to Docker Hub, after linting the code
 name: CI
 
 on:
   push:
-    branches: [master]
-
+    branches: [feat/github_actions]
+    
 jobs:
-  code-lint:
+  Docker:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: check out repository
         uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: login to docker hub  
+        uses: docker/login-action@v3
         with:
-          node-version: 20
-          cache: "npm" # Automates dependency caching for faster builds
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Lint (Biome)
-        run: npm run lint
-
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Docker Setup [Login]
-        uses: docker/login-action@v4
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Docker Build and Push
+      - name: Extract  metadata
+        id: meta 
+        uses: docker/metadata-action@v6
+        with:
+         images: ${{secrets.DOCKER_USERNAME}}/devboard-fe-master
+         tags: |
+          type=raw,value=latest 
+          type=sha,format=short
+          
+      
+      - name: build and push docker image
         uses: docker/build-push-action@v7
         with:
+          context: .
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-fe-master:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
+        
