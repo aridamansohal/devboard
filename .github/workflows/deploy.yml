@@ -17,4 +17,4 @@ jobs:
                 docker pull ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
                 docker stop devboard-fe-master || true
                 docker rm devboard-fe-master || true
-                docker run -d --name devboard-fe-master -p 80:4173 ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
+                docker run -d --name devboard-fe-master -p 80:80 ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
