@@ -18,21 +18,18 @@ jobs:
 
       - name: Validate SSH key
         run: |
-         echo "$KEY" > /tmp/testkey.pem
+            echo "$KEY" > /tmp/testkey.pem
+            chmod 600 /tmp/testkey.pem
 
-         chmod 600 /tmp/testkey.pem
+            echo "Line count:"
+            wc -l /tmp/testkey.pem
 
-         echo "First line:"
-         head -1 /tmp/testkey.pem
+            echo "Testing key..."
+            ssh-keygen -y -f /tmp/testkey.pem > /dev/null
 
-         echo "Last line:"
-         tail -1 /tmp/testkey.pem
-
-         ssh-keygen -y -f /tmp/testkey.pem > /dev/null
-
-         echo "KEY IS VALID"
+            echo "VALID"
         env:
-         KEY: ${{ secrets.EC2_SSH_KEY }}    
+         KEY: ${{ secrets.EC2_SSH_KEY }}  
 
       - name: deploy to ec2
         uses: appleboy/ssh-action@v1.0.3
