@@ -15,10 +15,12 @@ jobs:
           echo "Length=${#KEY}"
         env:
           KEY: ${{ secrets.EC2_SSH_KEY }}  
-          
+
       - name: Validate SSH key
         run: |
          echo "$KEY" > /tmp/testkey.pem
+
+         chmod 600 /tmp/testkey.pem
 
          echo "First line:"
          head -1 /tmp/testkey.pem
