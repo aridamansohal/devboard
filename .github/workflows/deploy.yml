@@ -26,5 +26,5 @@ jobs:
 
             docker rm devboard-fe-master || true
 
-            docker run -d --name devboard-fe-master -p 80:80
+            docker run -d --name devboard-fe-master -p 80:4173
             ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
