@@ -1,7 +1,11 @@
 name: deploy container
 
 on:
-  workflow_dispatch: null
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/github_actions
+        
 jobs:
   deploy:
     runs-on: ubuntu-latest
