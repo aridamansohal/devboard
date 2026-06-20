@@ -15,6 +15,22 @@ jobs:
           echo "Length=${#KEY}"
         env:
           KEY: ${{ secrets.EC2_SSH_KEY }}  
+          
+      - name: Validate SSH key
+        run: |
+         echo "$KEY" > /tmp/testkey.pem
+
+         echo "First line:"
+         head -1 /tmp/testkey.pem
+
+         echo "Last line:"
+         tail -1 /tmp/testkey.pem
+
+         ssh-keygen -y -f /tmp/testkey.pem > /dev/null
+
+         echo "KEY IS VALID"
+        env:
+         KEY: ${{ secrets.EC2_SSH_KEY }}    
 
       - name: deploy to ec2
         uses: appleboy/ssh-action@v1.0.3
