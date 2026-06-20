@@ -10,32 +10,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-        - name: Start SSH Agent
-          uses: webfactory/ssh-agent@v0.9.0
-          with:
-           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+        
 
-        - name: Test SSH
-          run: |
-           ssh -o StrictHostKeyChecking=no \
-           ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-           hostname
+      - name: deploy to ec2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: '${{ secrets.EC2_HOST }}'
+          username: '${{ secrets.EC2_USER }}'
+          key: '${{ secrets.EC2_SSH_KEY }}'
+          script: >
+            docker pull
+            ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
 
-      
+            docker stop devboard-fe-master || true
 
-    #   - name: deploy to ec2
-    #     uses: appleboy/ssh-action@v1.0.3
-    #     with:
-    #       host: '${{ secrets.EC2_HOST }}'
-    #       username: '${{ secrets.EC2_USER }}'
-    #       key: '${{ secrets.EC2_SSH_KEY }}'
-    #       script: >
-    #         docker pull
-    #         ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
+            docker rm devboard-fe-master || true
 
-    #         docker stop devboard-fe-master || true
-
-    #         docker rm devboard-fe-master || true
-
-    #         docker run -d --name devboard-fe-master -p 80:80
-    #         ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
+            docker run -d --name devboard-fe-master -p 80:80
+            ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
