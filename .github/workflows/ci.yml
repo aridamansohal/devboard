@@ -22,7 +22,7 @@ jobs:
         id: meta 
         uses: docker/metadata-action@v6
         with:
-         images: ${{secrets.DOCKER_USERNAME}}/devboard-fe-master
+         images: ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master
          tags: |
           type=raw,value=latest 
           type=sha,format=short
