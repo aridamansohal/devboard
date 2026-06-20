@@ -10,40 +10,32 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug key length
-        run: |
-          echo "Length=${#KEY}"
-        env:
-          KEY: ${{ secrets.EC2_SSH_KEY }}  
+        - name: Start SSH Agent
+          uses: webfactory/ssh-agent@v0.9.0
+          with:
+           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Validate SSH key
-        run: |
-            echo "$KEY" > /tmp/testkey.pem
-            chmod 600 /tmp/testkey.pem
+        - name: Test SSH
+         run: |
+          ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+          hostname
 
-            echo "Line count:"
-            wc -l /tmp/testkey.pem
+      
 
-            echo "Testing key..."
-            ssh-keygen -y -f /tmp/testkey.pem > /dev/null
+    #   - name: deploy to ec2
+    #     uses: appleboy/ssh-action@v1.0.3
+    #     with:
+    #       host: '${{ secrets.EC2_HOST }}'
+    #       username: '${{ secrets.EC2_USER }}'
+    #       key: '${{ secrets.EC2_SSH_KEY }}'
+    #       script: >
+    #         docker pull
+    #         ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
 
-            echo "VALID"
-        env:
-         KEY: ${{ secrets.EC2_SSH_KEY }}  
+    #         docker stop devboard-fe-master || true
 
-      - name: deploy to ec2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: '${{ secrets.EC2_HOST }}'
-          username: '${{ secrets.EC2_USER }}'
-          key: '${{ secrets.EC2_SSH_KEY }}'
-          script: >
-            docker pull
-            ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
+    #         docker rm devboard-fe-master || true
 
-            docker stop devboard-fe-master || true
-
-            docker rm devboard-fe-master || true
-
-            docker run -d --name devboard-fe-master -p 80:80
-            ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
+    #         docker run -d --name devboard-fe-master -p 80:80
+    #         ${{secrets.DOCKERHUB_USERNAME}}/devboard-fe-master:latest
