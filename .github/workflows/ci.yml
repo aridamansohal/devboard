@@ -75,7 +75,7 @@ jobs:
 
         - name: Verify Formatting
           run: |
-           if [ -n "$(gofmt -l .)" ]; then
+           if [ -n "$(gofmt -l ./backend)" ]; then
             echo "Formatting issues detected in the following files:"
             gofmt -l .
             echo "--- Diff output ---"
@@ -85,9 +85,11 @@ jobs:
 
         -  name: Static Analysis
            run: go vet ./...
+           working-directory: ./backend
 
         -  name: go test
            run: go test -v ./...
+           working-directory: ./backend
            
            
         -  name: metadata
