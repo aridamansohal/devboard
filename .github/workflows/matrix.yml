@@ -67,7 +67,7 @@ jobs:
            run: go test -v ./...
            working-directory: ./backend       
 
-   service:
+   build-and-push:
          needs: [lint-backend,lint-frontend]
          runs-on: ubuntu-latest
          strategy:
@@ -99,5 +99,8 @@ jobs:
               push: true
               tags: ${{steps.meta.outputs.tags}}
               labels: ${{steps.meta.outputs.labels}}
-
-
+   
+   deploy:
+      needs: build-and-push
+      uses: ./.github/workflows/cd.yml        
+      secrets: inherit  
