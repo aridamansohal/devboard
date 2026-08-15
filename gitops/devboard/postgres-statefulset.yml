@@ -1,76 +1,161 @@
+# Defines this resource as a Kubernetes StatefulSet.
 apiVersion: apps/v1
 kind: StatefulSet
+
 metadata:
+  # Name of the PostgreSQL StatefulSet.
   name: postgres-statefulset
+  namespace: devboard
+
 spec:
+  # Selects the Pods managed by this StatefulSet.
+  # Must match template.metadata.labels.
   selector:
     matchLabels:
-      app: devboard-postgres # has to match .spec.template.metadata.labels
-  serviceName: "postgres" # has to match the headless service name
-  replicas: 1 # by default is 1
-  
+      app: devboard-postgres
+
+  # Headless Service name used by the StatefulSet.
+  serviceName: "postgres"
+
+  # Run one PostgreSQL Pod.
+  replicas: 1
+
   template:
     metadata:
       labels:
-        app: devboard-postgres # has to match .spec.selector.matchLabels
+        app: devboard-postgres
+
     spec:
       containers:
+
       - name: postgres
         image: postgres:16-alpine
+
+        # PostgreSQL listens on port 5432.
         ports:
         - containerPort: 5432
-        env:   #kubectl explain pod.spec.containers.env.valueFrom
+
+        # PostgreSQL environment variables.
+        env:
+
+        # Get PostgreSQL username from Kubernetes Secret.
         - name: POSTGRES_USER
           valueFrom:
-           secretKeyRef:
-             name: devboard-secrets
-             key:  POSTGRES_USER
+            secretKeyRef:
+              name: devboard-secrets
+              key: POSTGRES_USER
 
+        # Get PostgreSQL database name from Kubernetes Secret.
         - name: POSTGRES_DB
           valueFrom:
-           secretKeyRef:
-             name: devboard-secrets
-             key:  POSTGRES_DB
+            secretKeyRef:
+              name: devboard-secrets
+              key: POSTGRES_DB
 
+        # Get PostgreSQL password from Kubernetes Secret.
         - name: POSTGRES_PASSWORD
           valueFrom:
-           secretKeyRef:
-             name: devboard-secrets
-             key: POSTGRES_PASSWORD
-        
-        # PostgreSQL Docker image uses PGDATA to define the database data directory.
-        - name:  PGDATA
+            secretKeyRef:
+              name: devboard-secrets
+              key: POSTGRES_PASSWORD
+
+        # PostgreSQL data directory.
+        - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
 
+        # Mount volumes inside the PostgreSQL container.
         volumeMounts:
-          # Mount the initialization SQL ConfigMap inside the PostgreSQL container.
+
+        # Mount initialization SQL files.
         - name: init
-          mountPath: /docker-entrypoint-initdb.d  
+          mountPath: /docker-entrypoint-initdb.d
           readOnly: true
-         # Mount persistent PostgreSQL storage at the directory used by PGDATA. 
+
+        # Mount persistent PostgreSQL storage.
         - name: data
           mountPath: /var/lib/postgresql/data
 
-      # The init volume comes from the postgres-init ConfigMap. 
+        # ==========================================================
+        # CORRECT LOCATION
+        # ==========================================================
+        # readinessProbe belongs to the CONTAINER.
+        #
+        # Our previous mistake was putting readinessProbe under:
+        #
+        #   template.spec
+        #
+        # instead of under:
+        #
+        #   template.spec.containers[0]
+        #
+        # That caused:
+        #   unknown field "spec.template.spec.readinessProbe"
+        #   unknown field "spec.template.spec.initialDelaySeconds"
+        #   unknown field "spec.template.spec.periodSeconds"
+        #
+        # Remember:
+        # readinessProbe = container-level setting.
+        # ==========================================================
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+
+          # Wait 5 seconds before the first check.
+          initialDelaySeconds: 5
+
+          # Check PostgreSQL every 5 seconds.
+          periodSeconds: 5
+
+      # ==========================================================
+      # POD-LEVEL VOLUMES
+      # ==========================================================
+      # volumes belongs under template.spec, NOT inside the
+      # postgres container.
+      # ==========================================================
       volumes:
+
+      # Initialization SQL comes from this ConfigMap.
       - name: init
         configMap:
-         name: postgres-init
+          name: postgres-init
 
-      # Kubernetes runs this command inside the container to check PostgreSQL readiness.
-      readinessProbe: 
-        exec:
-         command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
-      initialDelaySeconds: 5
-      periodSeconds: 5
-
-    # StatefulSet creates a PVC automatically from this template. 
+  # ==============================================================
+  # PERSISTENT STORAGE
+  # ==============================================================
+  # volumeClaimTemplates belongs directly under StatefulSet.spec.
+  #
+  # It is NOT under template.spec.
+  #
+  # Kubernetes creates:
+  #
+  # data-postgres-statefulset-0
+  #
+  # from this template.
+  # ==============================================================
   volumeClaimTemplates:
-    - metadata:
-       name: data
-      spec:
-       accessModes: [ "ReadWriteOnce" ]
-       storageClassName: "gp3"
-       resources:
+
+  - metadata:
+      # This name must match:
+      # volumeMounts:
+      # - name: data
+      name: data
+
+    spec:
+
+      # PostgreSQL needs read/write access.
+      accessModes:
+      - ReadWriteOnce
+
+      # Use the gp3 StorageClass.
+      storageClassName: "gp3"
+
+      # Request a 1 GiB volume.
+      resources:
         requests:
           storage: 1Gi
+
+
+          # Simple rule: readinessProbe checks a container, so it goes inside the container. volumes belongs to the Pod, so it goes outside the container. volumeClaimTemplates belongs to the StatefulSet, so it goes outside template.
