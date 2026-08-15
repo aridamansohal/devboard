@@ -13,7 +13,7 @@ spec:
     port: 80
     allowedRoutes:
           namespaces: 
-            from: same 
+            from: Same 
             
 # Needs the devboard-tls Secret. Without it this listener alone goes
 # ResolvedRefs=False; :80 keeps serving.
