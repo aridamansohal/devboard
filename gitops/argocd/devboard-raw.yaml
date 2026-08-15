@@ -1,0 +1,137 @@
+apiVersion: argoproj.io/v1alpha1
+# Argo CD's API version for an Application resource.
+# This is NOT the normal Kubernetes Deployment API.
+# An Application is an Argo CD object that tells Argo CD what to deploy.
+
+kind: Application
+# Says: "This YAML creates an Argo CD Application."
+
+metadata:
+  name: devboard-raw
+  # Name of this Application inside Argo CD.
+  # You will see this name in the Argo CD UI.
+
+  namespace: argocd
+  # The Argo CD Application object lives in the argocd namespace.
+  # This does NOT mean DevBoard resources will be deployed into argocd.
+  # The destination namespace below controls where DevBoard is deployed.
+
+spec:
+  project: default
+  # Argo CD Project that owns this Application.
+  # "default" is the built-in Argo CD project.
+  # Later, we could create a custom AppProject with security policies.
+
+  source:
+    # SOURCE = "Where should Argo CD get the desired configuration from?"
+
+    repoURL: https://github.com/LondheShubham153/devboard.git
+    # Git repository containing the Kubernetes manifests.
+    # Argo CD reads the desired state from this repository.
+
+    targetRevision: mega-project
+    # Git branch/tag/commit that Argo CD should watch.
+    # Here it watches the "mega-project" branch.
+
+    path: k8s
+    # Directory inside that Git branch containing the Kubernetes manifests.
+    #
+    # So Argo CD effectively does:
+    #
+    # GitHub repository
+    #       ↓
+    # mega-project branch
+    #       ↓
+    # k8s/
+    #       ↓
+    # Kubernetes manifests
+
+  destination:
+    # DESTINATION = "Where should Argo CD deploy those manifests?"
+
+    server: https://kubernetes.default.svc
+    # Kubernetes API server of the cluster where Argo CD itself is running.
+    #
+    # This is the internal Kubernetes Service name for the cluster API.
+    # It means: deploy to THIS Kubernetes cluster.
+
+    namespace: devboard
+    # Namespace where the DevBoard resources will be deployed.
+    #
+    # For example:
+    # Deployment
+    # Service
+    # ConfigMap
+    # etc.
+    #
+    # They will go into the devboard namespace.
+
+  ignoreDifferences:
+    # Tell Argo CD about fields where a difference between Git
+    # and the live Kubernetes object should NOT be treated as drift.
+
+    - group: apps
+      # Kubernetes API group containing the Deployment resource.
+
+      kind: Deployment
+      # Apply this rule only to Kubernetes Deployment objects.
+
+      jsonPointers:
+        # JSON Pointer identifies the exact field we want Argo CD to ignore.
+
+        - /spec/replicas
+        # Ignore ONLY the Deployment replica count.
+        #
+        # Example:
+        #
+        # Git says:
+        #   replicas: 1
+        #
+        # Kubernetes currently has:
+        #   replicas: 3
+        #
+        # Argo CD will NOT consider that difference by itself.
+        #
+        # Other Deployment fields are still checked.
+
+  syncPolicy:
+    # SYNC POLICY = "How should Argo CD keep Kubernetes synchronized with Git?"
+
+    automated:
+      # Enable automatic synchronization.
+      # Without this, you would normally have to manually trigger Sync.
+
+      prune: true
+      # If a resource was previously managed by this Application
+      # but is removed from Git, Argo CD can remove it from Kubernetes.
+      #
+      # Git:
+      #   deployment.yaml exists
+      #
+      # Later:
+      #   deployment.yaml deleted
+      #
+      # Argo CD:
+      #   removes the corresponding resource.
+
+      selfHeal: true
+      # If someone manually changes a managed resource in Kubernetes,
+      # Argo CD detects the drift and changes it back toward the Git state.
+      #
+      # Git says:
+      #   image = v1
+      #
+      # Someone manually changes cluster:
+      #   image = v2
+      #
+      # Argo CD notices the difference and syncs it back.
+
+    syncOptions:
+      # Additional options controlling how Argo CD performs synchronization.
+
+      - CreateNamespace=true
+      # If the destination namespace does not already exist,
+      # Argo CD is allowed to create it.
+      #
+      # Therefore "devboard" does not necessarily have to be
+      # manually created before the Application syncs.

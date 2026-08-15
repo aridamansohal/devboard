@@ -1,0 +1,71 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: 
+spec:
+  parentRefs:
+  - name: devboard-gateway
+ 
+  rules:
+  - matches:
+     - path:
+        type: Exact 
+        value: /api/ai/summarise
+    filters:
+       - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /summarise
+       
+
+    backendRefs:
+    - name: ai-service
+      port: 3005
+
+    timeouts:
+        request: "300s"
+        backendRequest: "300s"  
+
+  - matches:
+     - path:
+        type: Exact 
+        value: /api/ai/ask
+    filters:
+       - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ask    
+
+    backendRefs:
+    - name: ai-service
+      port: 3005
+
+    timeouts:
+        request: "300s"
+        backendRequest: "300s" 
+
+  - matches:
+     - path:
+        type: Exact 
+        value: /api/ai/health
+    filters:
+       - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /health  
+
+    backendRefs:
+    - name: ai-service
+      port: 3005
+
+
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: devboard-frontend-service
+      port: 8080

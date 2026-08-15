@@ -1,0 +1,11 @@
+---
+aws_region: us-west-2
+
+login_user: ubuntu
+
+# Used by the kubectl installation/compatibility logic.
+kubectl_version: v1.34.9
+
+# Leave empty — the EC2 instance profile provides AWS authentication.
+aws_access_key: ""
+aws_secret_key: ""

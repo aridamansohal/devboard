@@ -1,0 +1,8 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for tools
+# Architecture used by upstream binary download URLs.
+binary_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
+
+# AWS CLI uses x86_64 instead of amd64 for Intel/AMD Linux downloads.
+aws_cli_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"

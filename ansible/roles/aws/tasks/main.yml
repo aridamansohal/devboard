@@ -1,0 +1,36 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for aws
+
+# Configure AWS CLI region and kubectl shortcut; authentication comes from the EC2 IAM role.
+
+- name: Create AWS configuration directory
+  ansible.builtin.file:
+    path: "/home/{{ login_user }}/.aws"
+    state: directory
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: "0700"
+
+- name: Configure AWS default region
+  ansible.builtin.copy:
+    content: |
+      [default]
+      region = {{ aws_region }}
+      output = json
+    dest: "/home/{{ login_user }}/.aws/config"
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: "0600"
+
+# Create a shell startup file so AWS region, kubectl completion, and the `k` shortcut are available after login.
+
+- name: Configure AWS environment and kubectl shortcut
+  ansible.builtin.copy:
+    content: |
+      export AWS_REGION={{ aws_region }}
+      export AWS_DEFAULT_REGION={{ aws_region }}
+      source <(kubectl completion bash)
+      alias k=kubectl
+    dest: /etc/profile.d/devboard.sh
+    mode: "0644"

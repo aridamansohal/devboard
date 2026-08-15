@@ -1,0 +1,127 @@
+#SPDX-License-Identifier: MIT-0
+---
+
+# Show the architecture Ansible detected and the architecture used for binary downloads.
+- name: Show binary architecture
+  ansible.builtin.debug:
+    msg: "Ansible architecture={{ ansible_facts['architecture'] }}, binary architecture={{ binary_arch }}"
+
+- name: Install required Ubuntu packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - dnsutils
+      - git
+      - jq
+      - unzip
+    state: present
+    update_cache: true
+
+# Install AWS CLI v2 for AWS and EKS authentication.    
+
+# tasks file for tools
+- name: Download AWS CLI v2
+  ansible.builtin.get_url:
+    url: "https://awscli.amazonaws.com/awscli-exe-linux-{{ aws_cli_arch}}.zip"
+    dest: /tmp/awscli.zip
+    mode: "0644"
+
+- name: Unpack AWS CLI v2
+  ansible.builtin.unarchive:
+    src: /tmp/awscli.zip
+    dest: /tmp
+    remote_src: true
+    creates: /tmp/aws/install
+
+- name: Install AWS CLI v2
+  ansible.builtin.command:
+    cmd: /tmp/aws/install --update
+
+#Install Terraform for provisioning AWS infrastructure.
+
+
+- name: Get latest Terraform release information
+  ansible.builtin.uri:
+    url: https://checkpoint-api.hashicorp.com/v1/check/terraform
+    return_content: true
+  register: terraform_release
+  check_mode: false
+
+- name: Install Terraform
+  ansible.builtin.unarchive:
+    src: "https://releases.hashicorp.com/terraform/{{ terraform_release.json.current_version }}/terraform_{{ terraform_release.json.current_version }}_linux_{{ binary_arch }}.zip"
+    dest: /usr/local/bin
+    remote_src: true
+    mode: "0755"
+    creates: /usr/local/bin/terraform      
+
+# Install kubectl for managing the Kubernetes cluster.
+
+
+
+# Install kubectl compatible with the Kubernetes version used by EKS.
+- name: Install kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ binary_arch }}/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: "0755"
+
+
+# Install Helm - Kubernetes package manager used to deploy platform components.
+
+- name: Get latest Helm release
+  ansible.builtin.uri:
+    url: https://get.helm.sh/helm-latest-version
+    return_content: true
+  register: helm_release
+  check_mode: false
+
+- name: Download Helm
+  ansible.builtin.unarchive:
+    src: "https://get.helm.sh/helm-{{ helm_release.content | trim }}-linux-{{ binary_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    creates: "/tmp/linux-{{ binary_arch }}/helm"
+    check_mode: false
+
+- name: Install Helm
+  ansible.builtin.copy:
+    src: "/tmp/linux-{{ binary_arch }}/helm"
+    dest: /usr/local/bin/helm
+    mode: "0755"
+    remote_src: true
+
+# Install GitHub CLI for GitHub repository and workflow operations.
+# register = save the complete result of this task so later tasks can use it.
+# Example: API response → save everything inside gh_release.
+- name: Get latest GitHub CLI release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/cli/cli/releases/latest
+    return_content: true
+  register: gh_release
+  check_mode: false
+
+# set_fact = create a new variable from a value we already discovered.
+# Example: API gives "v2.97.0" → gh_tag = "v2.97.0", gh_version = "2.97.0".
+
+# GitHub uses two different names for the same release:
+# the API returns "v2.97.0" (tag) while the archive filename uses "2.97.0" (version), so we keep both.
+- name: Set GitHub CLI version
+  ansible.builtin.set_fact:
+    gh_tag: "{{ gh_release.json.tag_name }}"
+    gh_version: "{{ gh_release.json.tag_name | replace('v', '') }}"
+
+- name: Download GitHub CLI
+  ansible.builtin.unarchive:
+    src: "https://github.com/cli/cli/releases/download/{{ gh_tag }}/gh_{{ gh_version }}_linux_{{ binary_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    creates: "/tmp/gh_{{ gh_version }}_linux_{{ binary_arch }}/bin/gh"
+    check_mode: false
+
+- name: Install GitHub CLI
+  ansible.builtin.copy:
+    src: "/tmp/gh_{{ gh_version }}_linux_{{ binary_arch }}/bin/gh"
+    dest: /usr/local/bin/gh
+    mode: "0755"
+    remote_src: true

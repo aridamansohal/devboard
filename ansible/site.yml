@@ -1,0 +1,9 @@
+---
+- name: Bootstrap DevBoard workstation
+  hosts: devboard
+  become: true
+
+  roles:
+    - tools
+    - aws
+    - verify

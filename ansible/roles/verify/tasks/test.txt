@@ -1,0 +1,315 @@
+"tool_check": {
+        "changed": false,
+        "msg": "All items completed",
+        "results": [
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "aws",
+                    "--version"
+                ],
+                "delta": "0:00:00.721914",
+                "end": "2026-08-12 14:10:06.021184",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "aws --version",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "aws --version",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:05.299270",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "aws-cli/2.36.21 Python/3.14.6 Linux/7.0.0-1010-aws exe/x86_64.ubuntu.26",
+                "stdout_lines": [
+                    "aws-cli/2.36.21 Python/3.14.6 Linux/7.0.0-1010-aws exe/x86_64.ubuntu.26"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "terraform",
+                    "version"
+                ],
+                "delta": "0:00:00.133115",
+                "end": "2026-08-12 14:10:06.506532",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "terraform version",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "terraform version",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:06.373417",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "Terraform v1.15.8\non linux_amd64",
+                "stdout_lines": [
+                    "Terraform v1.15.8",
+                    "on linux_amd64"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "kubectl",
+                    "version",
+                    "--client"
+                ],
+                "delta": "0:00:00.054649",
+                "end": "2026-08-12 14:10:06.910219",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "kubectl version --client",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "kubectl version --client",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:06.855570",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "Client Version: v1.34.9\nKustomize Version: v5.7.1",
+                "stdout_lines": [
+                    "Client Version: v1.34.9",
+                    "Kustomize Version: v5.7.1"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "helm",
+                    "version",
+                    "--short"
+                ],
+                "delta": "0:00:00.057574",
+                "end": "2026-08-12 14:10:07.322448",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "helm version --short",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "helm version --short",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:07.264874",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "v4.2.3+g43e8b7f",
+                "stdout_lines": [
+                    "v4.2.3+g43e8b7f"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "jq",
+                    "--version"
+                ],
+                "delta": "0:00:00.006907",
+                "end": "2026-08-12 14:10:07.674633",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "jq --version",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "jq --version",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:07.667726",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "jq-1.8.1",
+                "stdout_lines": [
+                    "jq-1.8.1"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "dig",
+                    "-v"
+                ],
+                "delta": "0:00:00.023732",
+                "end": "2026-08-12 14:10:08.048861",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "dig -v",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "dig -v",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:08.025129",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "DiG 9.20.18-1ubuntu2.1-Ubuntu",
+                "stdout_lines": [
+                    "DiG 9.20.18-1ubuntu2.1-Ubuntu"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "git",
+                    "--version"
+                ],
+                "delta": "0:00:00.004514",
+                "end": "2026-08-12 14:10:08.393579",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "git --version",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "git --version",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:08.389065",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "git version 2.53.0",
+                "stdout_lines": [
+                    "git version 2.53.0"
+                ]
+            },
+            {
+                "ansible_loop_var": "item",
+                "changed": false,
+                "cmd": [
+                    "gh",
+                    "--version"
+                ],
+                "delta": "0:00:00.051572",
+                "end": "2026-08-12 14:10:08.787868",
+                "failed": false,
+                "invocation": {
+                    "module_args": {
+                        "_raw_params": null,
+                        "_uses_shell": false,
+                        "argv": null,
+                        "chdir": null,
+                        "cmd": "gh --version",
+                        "creates": null,
+                        "executable": null,
+                        "expand_argument_vars": true,
+                        "removes": null,
+                        "stdin": null,
+                        "stdin_add_newline": true,
+                        "strip_empty_ends": true
+                    }
+                },
+                "item": "gh --version",
+                "msg": "",
+                "rc": 0,
+                "start": "2026-08-12 14:10:08.736296",
+                "stderr": "",
+                "stderr_lines": [],
+                "stdout": "gh version 2.97.0 (2026-07-31)\nhttps://github.com/cli/cli/releases/tag/v2.97.0",
+                "stdout_lines": [
+                    "gh version 2.97.0 (2026-07-31)",
+                    "https://github.com/cli/cli/releases/tag/v2.97.0"
+                ]
+            }
+        ],
+        "skipped": false
+    }
+}
+
+
+
+ "stdout": "{\n    
+ \"UserId\": \"AROAQOYCEXHL7HJSE37LE:i-064d55d1a5f1b624a\",\n    \"Account\": \"031679887831\",\n    \"Arn\": \"arn:aws:sts::031679887831:assumed-role/mega-project-role/i-064d55d1a5f1b624a\"\n
+ }"

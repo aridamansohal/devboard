@@ -2,73 +2,75 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres-statefulset
-  namespace: devboard
-  labels:
-    app: devboard-postgres
 spec:
-  serviceName: postgres
-  replicas: 1
   selector:
     matchLabels:
-      app: devboard-postgres
+      app: devboard-postgres # has to match .spec.template.metadata.labels
+  serviceName: "postgres" # has to match the headless service name
+  replicas: 1 # by default is 1
+  
   template:
     metadata:
       labels:
-        app: devboard-postgres
+        app: devboard-postgres # has to match .spec.selector.matchLabels
     spec:
       containers:
       - name: postgres
         image: postgres:16-alpine
         ports:
-          - containerPort: 5432
-        env:
-          - name: POSTGRES_USER
-            valueFrom:
-              configMapKeyRef:
-                name: devboard-configmap
-                key: POSTGRES_USER
-          
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: devboard-secrets
-                key: POSTGRES_PASSWORD
+        - containerPort: 5432
+        env:   #kubectl explain pod.spec.containers.env.valueFrom
+        - name: POSTGRES_USER
+          valueFrom:
+           secretKeyRef:
+             name: devboard-secrets
+             key:  POSTGRES_USER
 
-          - name: POSTGRES_DB
-            valueFrom:
-              secretKeyRef:
-                name: devboard-secrets
-                key: POSTGRES_DB
+        - name: POSTGRES_DB
+          valueFrom:
+           secretKeyRef:
+             name: devboard-secrets
+             key:  POSTGRES_DB
 
-          # Use a subdirectory as the data dir. When the volume is a real block
-          # device (EBS), its filesystem root contains a lost+found directory,
-          # and Postgres refuses to initdb into a non-empty mount point.
-          - name: PGDATA
-            value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+           secretKeyRef:
+             name: devboard-secrets
+             key: POSTGRES_PASSWORD
+        
+        # PostgreSQL Docker image uses PGDATA to define the database data directory.
+        - name:  PGDATA
+          value: /var/lib/postgresql/data/pgdata
 
-        readinessProbe:
-          exec:
-            command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
-          initialDelaySeconds: 15
-          periodSeconds: 10
         volumeMounts:
-          - name: init
-            mountPath: /docker-entrypoint-initdb.d
-            readOnly: true
-          - name: data 
-            mountPath: /var/lib/postgresql/data
-
-      volumes:
+          # Mount the initialization SQL ConfigMap inside the PostgreSQL container.
         - name: init
-          configMap:
-            name: postgres-init 
-  volumeClaimTemplates:
+          mountPath: /docker-entrypoint-initdb.d  
+          readOnly: true
+         # Mount persistent PostgreSQL storage at the directory used by PGDATA. 
+        - name: data
+          mountPath: /var/lib/postgresql/data
+
+      # The init volume comes from the postgres-init ConfigMap. 
+      volumes:
+      - name: init
+        configMap:
+         name: postgres-init
+
+      # Kubernetes runs this command inside the container to check PostgreSQL readiness.
+      readinessProbe: 
+        exec:
+         command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+    # StatefulSet creates a PVC automatically from this template. 
+    volumeClaimTemplates:
     - metadata:
-        name: data
-        namespace: devboard
+       name: data
       spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
+       accessModes: [ "ReadWriteOnce" ]
+       storageClassName: "gp3"
+       resources:
+        requests:
+          storage: 1Gi

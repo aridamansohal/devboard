@@ -1,0 +1,162 @@
+---
+# Verify that the DevBoard machine has the required tools,
+# the correct Terraform version, and working AWS access.
+
+
+# ============================================================
+# 1. Check required command-line tools
+# ============================================================
+
+# Run each command and save all results in `tool_check`.
+# Because this task uses a loop, Ansible stores every command result
+# inside `tool_check.results`.
+- name: Check required command-line tools
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  loop:
+    - aws --version
+    - terraform version
+    - kubectl version --client
+    - helm version --short
+    - jq --version
+    - dig -v
+    - git --version
+    - gh --version
+  register: tool_check
+
+  # These commands only check versions; they do not change the machine.
+  changed_when: false
+
+
+# Show everything Ansible saved in `tool_check`.
+# This is useful while learning because we can see the actual structure
+# Ansible creates when a registered task uses a loop.
+- name: Show complete tool_check result
+  ansible.builtin.debug:
+    var: tool_check
+
+
+# `tool_check.results` is the list Ansible created because the previous
+# task used `register` together with a `loop`.
+#
+# The second loop takes ONE result from that list at a time.
+# `loop_var: tool_result` gives that current result a clear name.
+#
+# Example current result:
+# tool_result:
+#   item: "terraform version"
+#   stdout: "Terraform v1.15.8"
+#
+# Therefore:
+#   tool_result.item   → "terraform version"  (the command we ran)
+#   tool_result.stdout → "Terraform v1.15.8"  (the command output)
+- name: Show installed tool versions
+  ansible.builtin.debug:
+    msg: "{{ (tool_result.stdout or tool_result.stderr).splitlines() | first }}"
+  loop: "{{ tool_check.results }}"
+  loop_control:
+    # Rename the current loop value from Ansible's default `item` to `tool_result`.
+    loop_var: tool_result
+
+    # Use the original command as the label so the output is easy to identify.
+    label: "{{ tool_result.item }}"
+
+
+# ============================================================
+# 2. Check Terraform version
+# ============================================================
+
+# Ask Terraform for JSON output so we can read its version as a field.
+- name: Get Terraform version
+  ansible.builtin.command:
+    cmd: terraform version -json
+  register: terraform_version
+  changed_when: false
+
+
+# Show everything Ansible captured from the Terraform command.
+- name: Show complete Terraform version result
+  ansible.builtin.debug:
+    var: terraform_version
+
+
+# `assert` means: "this condition must be true."
+# If Terraform is >= 1.11.0 → continue.
+# If Terraform is older → stop and show `fail_msg`.
+- name: Validate Terraform version
+  ansible.builtin.assert:
+    that:
+      - (terraform_version.stdout | from_json).terraform_version is version('1.11.0', '>=')
+
+    fail_msg: >-
+      Terraform {{ (terraform_version.stdout | from_json).terraform_version }}
+      is too old. Terraform 1.11.0 or newer is required.
+
+    success_msg: >-
+      Terraform {{ (terraform_version.stdout | from_json).terraform_version }}
+      meets the minimum required version.
+
+
+# ============================================================
+# 3. Verify AWS authentication
+# ============================================================
+
+# Run AWS STS using the EC2 instance's IAM role.
+# `register` saves the complete command result in `aws_identity`.
+- name: Check AWS authentication
+  ansible.builtin.command:
+    cmd: aws sts get-caller-identity --output json
+  become: true
+  become_user: "{{ login_user }}"
+  register: aws_identity
+  changed_when: false
+
+  # Don't stop here if AWS fails; save the result so we can inspect it.
+  # Example: rc=0 → success, rc!=0 → authentication failed.
+  failed_when: false
+
+
+# Show everything Ansible captured from the AWS command.
+- name: Show complete AWS identity result
+  ansible.builtin.debug:
+    var: aws_identity
+
+
+# AWS returns JSON as command output.
+#
+# Example: aws_identity.stdout contains:
+# {
+#   "UserId": "...",
+#   "Account": "031679887831",
+#   "Arn": "arn:aws:sts::031679887831:assumed-role/mega-project-role/..."
+# }
+#
+# `aws_identity.stdout` = JSON text captured by Ansible.
+# `from_json` = converts that JSON text into an object.
+# `.Account` / `.Arn` = fields returned by AWS.
+#
+# Example:
+# (aws_identity.stdout | from_json).Account
+#        ↓
+# "031679887831"
+#
+# (aws_identity.stdout | from_json).Arn
+#        ↓
+# "arn:aws:sts::031679887831:assumed-role/mega-project-role/..."
+- name: Show AWS identity
+  ansible.builtin.debug:
+    msg: >-
+      AWS authentication successful.
+      Account: {{ (aws_identity.stdout | from_json).Account }}
+      Identity: {{ (aws_identity.stdout | from_json).Arn }}
+  when: aws_identity.rc == 0
+
+
+# We allowed the AWS command to fail above so we could inspect its result.
+# Now make the final decision: if rc is not 0, stop with a useful message.
+- name: Fail if AWS authentication is not working
+  ansible.builtin.fail:
+    msg: >-
+      AWS authentication failed.
+      Verify that the EC2 instance has the expected IAM role attached.
+  when: aws_identity.rc != 0
