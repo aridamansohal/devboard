@@ -1,0 +1,19 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: devboard-proxy
+  namespace: devboard
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+
+      # IMPORTANT:
+      # Normally Envoy Gateway creates a Deployment with 1 replica.
+      # We want one Envoy pod on each EKS node.
+      envoyDaemonSet: {}
+
+      envoyService:
+        # Keep Local because every node will have an Envoy pod.
+        # The AWS Load Balancer can therefore health-check each node locally.
+        externalTrafficPolicy: Local
