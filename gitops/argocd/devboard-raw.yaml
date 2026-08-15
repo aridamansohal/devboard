@@ -25,22 +25,22 @@ spec:
   source:
     # SOURCE = "Where should Argo CD get the desired configuration from?"
 
-    repoURL: https://github.com/LondheShubham153/devboard.git
+    repoURL: https://github.com/aridamansohal/devboard.git
     # Git repository containing the Kubernetes manifests.
     # Argo CD reads the desired state from this repository.
 
-    targetRevision: mega-project
+    targetRevision: master
     # Git branch/tag/commit that Argo CD should watch.
-    # Here it watches the "mega-project" branch.
+    # Here it watches the "master" branch.
 
-    path: k8s
+    path: gitops/devboard
     # Directory inside that Git branch containing the Kubernetes manifests.
     #
     # So Argo CD effectively does:
     #
     # GitHub repository
     #       ↓
-    # mega-project branch
+    # master branch
     #       ↓
     # k8s/
     #       ↓

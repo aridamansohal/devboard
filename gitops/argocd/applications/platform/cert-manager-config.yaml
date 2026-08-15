@@ -12,9 +12,9 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/LondheShubham153/devboard.git
-    targetRevision: mega-project
-    path: gitops/cert-manager
+    repoURL:  https://github.com/aridamansohal/devboard.git
+    targetRevision: master
+    path: gitops/platform/cert-manager
 
   destination:
     server: https://kubernetes.default.svc

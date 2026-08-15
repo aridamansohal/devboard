@@ -1,21 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-secrets-config
+  name: observability-dashboards
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   project: default
 
   source:
-    repoURL: https://github.com/LondheShubham153/devboard.git
-    targetRevision: mega-project
-    path: gitops/external-secrets
+    repoURL: https://github.com/aridamansohal/devboard.git
+    targetRevision: master
+    path: gitops/platform/observability/dashboards
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: external-secrets
+    namespace: observability
 
   syncPolicy:
     automated:

@@ -9,9 +9,9 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/LondheShubham153/devboard.git
-    targetRevision: mega-project
-    path: gitops/observability/manifests
+    repoURL: https://github.com/aridamansohal/devboard.git
+    targetRevision: master
+    path: gitops/platform/observability/manifests
 
   destination:
     server: https://kubernetes.default.svc

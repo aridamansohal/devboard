@@ -9,7 +9,8 @@ metadata:
 spec:
   secretName: devboard-tls
   dnsNames:
-    - devboard.trainwithshubham.com ## chnange it later
+    - devboard.stackforges.com
+
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer

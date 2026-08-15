@@ -7,9 +7,9 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/LondheShubham153/devboard.git
-    targetRevision: mega-project
-    path: gitops/argocd/platform
+    repoURL: https://github.com/aridamansohal/devboard.git
+    targetRevision: master
+    path: gitops/argocd/applications/platform
 
   destination:
     server: https://kubernetes.default.svc
