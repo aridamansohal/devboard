@@ -1,6 +1,5 @@
 # Lives in devboard because a Gateway listener can only reference a Secret in its
-# own namespace. Start on staging, confirm Ready, then switch to prod - in GIT,
-# since selfHeal reverts kubectl patch.
+# own namespace.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -8,16 +7,21 @@ metadata:
   namespace: devboard
 spec:
   secretName: devboard-tls
+
   dnsNames:
     - devboard.stackforges.com
 
+  # Use the production Let's Encrypt issuer.
+  # This replaces the browser-untrusted staging certificate.
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-prod
     kind: ClusterIssuer
     group: cert-manager.io
+
   privateKey:
     algorithm: ECDSA
     size: 256
     rotationPolicy: Always
-  # Let's Encrypt certs last 90 days; renew 30 days out.
+
+  # Renew 30 days before the 90-day certificate expires.
   renewBefore: 720h
