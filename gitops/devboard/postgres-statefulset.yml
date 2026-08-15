@@ -65,7 +65,7 @@ spec:
       periodSeconds: 5
 
     # StatefulSet creates a PVC automatically from this template. 
-    volumeClaimTemplates:
+  volumeClaimTemplates:
     - metadata:
        name: data
       spec:
