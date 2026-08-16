@@ -1,0 +1,25 @@
+# Allows an HTTPRoute in the devboard namespace
+# to reference a Service in the observability namespace.
+#
+# Grafana itself runs in the observability namespace.
+# Our Gateway and HTTPRoute live in devboard.
+#
+# ReferenceGrant is required for this cross-namespace
+# backend reference.
+
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+
+metadata:
+  name: allow-devboard-to-observability
+  namespace: observability
+
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: devboard
+
+  to:
+    - group: ""
+      kind: Service
