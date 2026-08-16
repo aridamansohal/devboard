@@ -1,0 +1,35 @@
+
+#
+# Browser:
+#   https://argocd.stackforges.com
+#
+# Gateway:
+#   devboard-gateway
+#
+# Listener:
+#   argocd-https
+#
+# Backend:
+#   argocd-server:443
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-route
+  namespace: devboard
+
+spec: 
+  parentRefs:
+  - name: devboard-gateway
+    sectionName: argocd-https
+
+  hostnames:
+     - argocd.stackforges.com
+
+  rules:
+    -  backendRefs:
+          - name: argocd-server
+            namespace: argocd
+            port: 443
+
+            

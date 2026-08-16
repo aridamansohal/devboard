@@ -1,0 +1,23 @@
+# Allows an HTTPRoute in the devboard namespace
+# to reference a Service in the observability namespace.
+#
+# Argo CD itself runs in the argocd namespace.
+# ReferenceGrant is required for this cross-namespace
+# backend reference.
+
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+
+metadata:
+  name: allow-devboard-to-argocd
+  namespace: argocd
+
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: devboard
+
+  to:
+    - group: ""
+      kind: Service

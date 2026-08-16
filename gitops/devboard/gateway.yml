@@ -64,3 +64,21 @@ spec:
     allowedRoutes:
       namespaces:
         from: Same
+
+  - name: argocd-https
+    port: 443
+    protocol: HTTPS
+    hostname: argocd.stackforges.com
+
+    tls:
+      mode: Terminate
+      certificateRefs:
+        - group: ""
+          kind: Secret
+          name: argocd-tls
+
+    # HTTPRoutes must be in the same namespace as
+    # this Gateway.
+    allowedRoutes:
+      namespaces:
+        from: Same      

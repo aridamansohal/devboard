@@ -1,0 +1,41 @@
+# TLS certificate for Argo CD.
+#
+# The existing devboard-tls certificate is for
+# devboard.stackforges.com only.
+#
+# Argo CD will use:
+# argocd.stackforges.com
+#
+# cert-manager will obtain the certificate from
+# the letsencrypt-prod ClusterIssuer and store the
+# resulting TLS certificate/private key in the
+# argocd-tls Secret.
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+
+metadata:
+  name: argocd-tls
+  namespace: devboard
+
+spec:
+  # Secret that cert-manager will create/manage.
+  # The Gateway will use this Secret later.
+  secretName: argocd-tls
+
+  # Domain that this certificate must cover.
+  dnsNames:
+    - argocd.stackforges.com
+  # Use the existing production Let's Encrypt issuer.
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+
+  # Renew approximately 30 days before expiry.
+  renewBefore: 720h
