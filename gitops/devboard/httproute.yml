@@ -6,11 +6,17 @@ metadata:
 spec:
   parentRefs:
    - name: devboard-gateway
- 
+  
+  # This route is ONLY for DevBoard.
+  # Without this, the "/" PathPrefix can also match
+  # requests intended for Grafana.
+  hostnames:
+    - devboard.stackforges.com
+    
   rules:
   - matches:
      - path:
-        type: Exact 
+        type: Exact
         value: /api/ai/summarise
     filters:
        - type: URLRewrite
@@ -18,7 +24,7 @@ spec:
             path:
               type: ReplaceFullPath
               replaceFullPath: /summarise
-       
+
 
     backendRefs:
     - name: ai-service
@@ -26,18 +32,18 @@ spec:
 
     timeouts:
         request: "300s"
-        backendRequest: "300s"  
+        backendRequest: "300s"
 
   - matches:
      - path:
-        type: Exact 
+        type: Exact
         value: /api/ai/ask
     filters:
        - type: URLRewrite
          urlRewrite:
             path:
               type: ReplaceFullPath
-              replaceFullPath: /ask    
+              replaceFullPath: /ask
 
     backendRefs:
     - name: ai-service
@@ -45,18 +51,18 @@ spec:
 
     timeouts:
         request: "300s"
-        backendRequest: "300s" 
+        backendRequest: "300s"
 
   - matches:
      - path:
-        type: Exact 
+        type: Exact
         value: /api/ai/health
     filters:
        - type: URLRewrite
          urlRewrite:
             path:
               type: ReplaceFullPath
-              replaceFullPath: /health  
+              replaceFullPath: /health
 
     backendRefs:
     - name: ai-service
@@ -70,3 +76,4 @@ spec:
     backendRefs:
     - name: devboard-frontend-service
       port: 8080
+
