@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: devboard-frontend-deployment
   namespace: devboard
@@ -10,6 +10,12 @@ spec:
   selector:
     matchLabels:
       app: devboard-frontend
+  strategy:
+    blueGreen:
+      activeService: devboard-frontend-service
+      previewService: devboard-frontend-preview
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
   template:
     metadata:
       labels:
