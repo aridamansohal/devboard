@@ -23,7 +23,7 @@ jobs:
             - name: Docker Setup [Login]
               uses: docker/login-action@v4
               with:
-                username: ${{ vars.DOCKERHUB_USERNAME }}
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
 
             - name: Docker Build and Push
@@ -31,12 +31,12 @@ jobs:
               with:
                 context: ./${{ matrix.folders}}
                 push: true
-                tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders}}:latest
+                tags: ${{ secrets.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders}}:latest
 
             - name: Generate SBOM
               uses: anchore/sbom-action@v0
               with:
-                image: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders}}:latest
+                image: ${{ secrets.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders}}:latest
                 format: spdx-json
                 output-file: sbom-${{ matrix.folders}}.spdx.json
 
@@ -52,5 +52,5 @@ jobs:
 
             - name: Sign Docker image with Cosign
               env:
-                IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders }}:latest
+                IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders }}:latest
               run: cosign sign --yes "$IMAGE"
