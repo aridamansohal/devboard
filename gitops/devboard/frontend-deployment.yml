@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollout-version: "2"
+        rollout-version: "3"
       labels:
         app: devboard-frontend
     spec:
