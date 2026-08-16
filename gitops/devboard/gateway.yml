@@ -36,3 +36,31 @@ spec:
     allowedRoutes:
       namespaces:
         from: Same
+
+
+  # Grafana HTTPS listener.
+  #
+  # Why:
+  # The existing HTTPS listener is specifically for
+  # devboard.stackforges.com.
+  #
+  # Grafana uses a different hostname and therefore
+  # needs a listener for grafana.stackforges.com.
+
+  - name: grafana-https
+    port: 443
+    protocol: HTTPS
+    hostname: grafana.stackforges.com
+
+    tls:
+      mode: Terminate
+      certificateRefs:
+        - group: ""
+          kind: Secret
+          name: grafana-tls
+
+    # HTTPRoutes must be in the same namespace as
+    # this Gateway.
+    allowedRoutes:
+      namespaces:
+        from: Same
