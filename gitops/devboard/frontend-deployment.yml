@@ -18,6 +18,8 @@ spec:
       scaleDownDelaySeconds: 30
   template:
     metadata:
+      annotations:
+        rollout-version: "2"
       labels:
         app: devboard-frontend
     spec:
