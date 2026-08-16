@@ -109,6 +109,13 @@ spec:
           # Check PostgreSQL every 5 seconds.
           periodSeconds: 5
 
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi  
       # ==========================================================
       # POD-LEVEL VOLUMES
       # ==========================================================
@@ -158,4 +165,3 @@ spec:
           storage: 1Gi
 
 
-          # Simple rule: readinessProbe checks a container, so it goes inside the container. volumes belongs to the Pod, so it goes outside the container. volumeClaimTemplates belongs to the StatefulSet, so it goes outside template.
