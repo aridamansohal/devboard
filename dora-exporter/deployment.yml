@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dora-exporter
+  namespace: dora
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dora-exporter
+  template:
+    metadata:
+      labels:
+        app: dora-exporter
+    spec:
+      containers:
+        - name: dora-exporter
+          image: arid1416/devboard-dora-exporter:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dora-github-token
+                  key: token
+            - name: GITHUB_REPO
+              value: aridamansohal/devboard
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

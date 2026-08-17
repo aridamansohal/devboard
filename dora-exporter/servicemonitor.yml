@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dora-exporter
+  namespace: dora
+  labels:
+    app: dora-exporter
+spec:
+  selector:
+    matchLabels:
+      app: dora-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
